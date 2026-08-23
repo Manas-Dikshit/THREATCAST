@@ -104,6 +104,7 @@ def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
     records: list[FlowRecord] = []
     for key, st in sorted(flows.items(), key=lambda kv: kv[1].start or 0.0):
         (a_ip, a_port), (b_ip, b_port), proto = key
+        flag_string = "".join(c for c in _FLAG_LETTERS if c in st.flags) or None
         records.append(
             FlowRecord(
                 timestamp=_epoch_to_datetime(st.start),
@@ -115,7 +116,7 @@ def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
                 total_bytes=float(st.nbytes),
                 total_packets=float(st.packets),
                 duration_s=max((st.end or st.start) - st.start, 0.0),
-                flags="".join(c for c in _FLAG_LETTERS + "PU"[:0] if c in st.flags) or None,
+                flags=flag_string,
                 ttl_mean=_mean(st.ttls),
                 ttl_var=_var(st.ttls),
                 tcp_window_mean=_mean(st.windows),
