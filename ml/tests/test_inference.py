@@ -87,24 +87,22 @@ class TestRollout:
         for k, e in enumerate(entries, start=1):
             assert e.timestamp == last_end + timedelta(seconds=10 * k)
 
-    def test_autoregressive_feedback_changes_states(self, predictor):
-        """Step 2 must be computed from a window containing S(t+1), so the
-        rollout is genuinely autoregressive (not K independent predictions)."""
+    def test_autoregressive_feedback_consistency(self, predictor):
+        """Rollout step 2 must equal a direct prediction from a window whose
+        last state IS rollout step 1 — proving predictions are fed back."""
+        import copy
+
         import numpy as np
-        import torch
 
         seq = benign_sequence(np.random.default_rng(9))
         entries = predictor.rollout(seq, horizon=2)
-        # recompute step-2 prediction WITHOUT feedback; must differ
-        x = predictor._tensor(seq)
-        with torch.no_grad():
-            direct = predictor.model(x)["next_state_pred"][0]
-        assert not np.allclose(
-            np.array([entries[1].features[n] for n in FEATURES]),
-            predictor.vectorizer.denormalize(direct.cpu().numpy().astype(np.float32))
-            and np.array([entries[1].features[n] for n in FEATURES]),
-            rtol=1e-4, atol=1e-6,
-        )
+
+        seq2 = copy.deepcopy(seq)
+        seq2.states[-1].features = dict(entries[0].features)  # append S(t+1), drop S(t-3)
+        step2_direct = predictor.predict_next_state(seq2)
+
+        for name in FEATURES:
+            assert abs(step2_direct[name] - entries[1].features[name]) < 1e-3
 
     def test_invalid_horizon(self, predictor):
         import numpy as np
