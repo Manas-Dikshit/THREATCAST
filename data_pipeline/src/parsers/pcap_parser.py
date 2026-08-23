@@ -77,7 +77,7 @@ def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
 
             if tcp is not None:
                 value = int(tcp.flags)
-                state.flags |= {letter for letter, bit in zip("FSRPAPU", (0x01, 0x02, 0x04, 0x08, 0x10, 0x20)) if value & bit}
+                state.flags |= {letter for letter, bit in zip("FSRPAU", (0x01, 0x02, 0x04, 0x08, 0x10, 0x20)) if value & bit}
                 state.windows.append(int(tcp.window))
                 seq_key = (forward, int(tcp.seq))
                 if seq_key in state.seq_seen:
