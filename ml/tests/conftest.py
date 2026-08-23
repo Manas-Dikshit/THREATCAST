@@ -128,8 +128,7 @@ def trained_artifacts(synthetic_export, tmp_path_factory):
     cfg = make_tiny_config()
     artifacts_dir = tmp_path_factory.mktemp("artifacts")
     result = Trainer(cfg, artifacts_dir).train(synthetic_export["dir"])
-    paths = save_artifacts(result, cfg, artifacts_dir, synthetic_export["dir"],
-                           dataset_info={"generator": "synthetic_linear_ar"})
-    assert "next_state" in str(paths) or True  # paths returned; existence asserted in tests
+    save_artifacts(result, cfg, artifacts_dir, synthetic_export["dir"],
+                   dataset_info={"generator": "synthetic_linear_ar"})
     predictor = WorldModelPredictor.load(artifacts_dir, device="cpu")
     return artifacts_dir, predictor, cfg
