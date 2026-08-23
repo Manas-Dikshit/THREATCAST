@@ -1,0 +1,23 @@
+# THREATCAST model configuration (consumed by later ml phases)
+# Values mirror .env.example defaults; env vars take precedence.
+
+model:
+  name: threatcast-world-model
+  version: 0.1.0
+  backbone: temporal_transformer   # baseline alternative: lstm
+  layers: 4
+  d_model: 128
+  heads: 4
+  dropout: 0.1
+
+sequence:
+  length: 5          # ML_SEQUENCE_LENGTH
+  prediction_horizon: 3  # ML_PREDICTION_HORIZON
+
+training:
+  device: auto       # auto | cuda | cpu
+  precision: fp16    # AMP on CUDA
+  batch_size: 32
+  grad_accumulation: 1
+  num_workers: 2
+  checkpoint_dir: ./ml/checkpoints
