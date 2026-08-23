@@ -1,6 +1,7 @@
 """Evaluation metrics + logistic regression baseline."""
 
 import numpy as np
+import pytest
 
 from ml.src.evaluation.baseline import evaluate_baseline
 from ml.src.evaluation.metrics import classification_metrics, temporal_metrics
@@ -23,9 +24,6 @@ class TestClassificationMetrics:
     def test_single_class_degenerate(self):
         m = classification_metrics(np.zeros(5, dtype=int), np.zeros(5, dtype=int))
         assert m["degenerate"] and np.isnan(m["accuracy"])
-
-
-import pytest  # noqa: E402  (kept after class for readability of table above)
 
 
 class TestTemporalMetrics:
