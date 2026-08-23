@@ -39,18 +39,17 @@ _FLAG_LETTERS = {
 
 
 def _parse_timestamps(series: pd.Series) -> pd.Series:
-    """Try explicit formats (day-first first), then pandas inference. NaT survives."""
-    best: pd.Series | None = None
-    best_parsed = -1
+    """Cumulatively apply explicit formats (day-first first), then inference.
+
+    Each format fills only the rows it can parse, so mixed-format files and
+    ambiguous ties don't silently drop rows.
+    """
+    combined = pd.to_datetime(pd.Series(pd.NaT, index=series.index), errors="coerce", utc=True)
     for fmt in _TIMESTAMP_FORMATS:
         parsed = pd.to_datetime(series, format=fmt, errors="coerce", utc=True)
-        n = parsed.notna().sum()
-        if n > best_parsed:
-            best, best_parsed = parsed, n
+        combined = combined.fillna(parsed)
     inferred = pd.to_datetime(series, errors="coerce", utc=True)
-    if inferred.notna().sum() > best_parsed:
-        best = inferred
-    return best if best is not None else pd.to_datetime(series, errors="coerce", utc=True)
+    return combined.fillna(inferred)
 
 
 def _to_numeric(df: pd.DataFrame, columns: list[str]) -> None:
@@ -86,7 +85,7 @@ def build_flow_table(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str], l
     df = raw.rename(columns={orig: canon for canon, orig in mapping.items()}).copy()
 
     # Coerce every non-timestamp/non-IP/non-label column to numeric where possible.
-    ip_label_cols = {"src_ip", "dst_ip", "label"}
+    ip_label_cols = {"src_ip", "dst_ip", "label", "flags"}
     for col in df.columns:
         if col in ("timestamp", *ip_label_cols):
             continue
