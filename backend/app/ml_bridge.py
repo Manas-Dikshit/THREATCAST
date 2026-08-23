@@ -15,6 +15,15 @@ for _p in (str(_ROOT),):
         sys.path.insert(0, _p)
 
 
+def _ml_sequence_length() -> int:
+    try:
+        from .core.config import get_settings
+
+        return get_settings().ml_sequence_length
+    except Exception:
+        return 5
+
+
 def latest_sequence_for_dataset(db: Session, dataset_id: str | None):
     """Rebuild the most recent NetworkStateSequence from stored states.
 
