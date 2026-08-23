@@ -1,1 +1,5 @@
-﻿"""THREATCAST module placeholder - implemented in a later phase."""
+﻿"""Stable inference interface for Phase 4."""
+
+from .predictor import WorldModelPredictor
+
+__all__ = ["WorldModelPredictor"]
