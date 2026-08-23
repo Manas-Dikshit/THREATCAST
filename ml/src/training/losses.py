@@ -80,11 +80,11 @@ def world_model_loss(outputs: dict[str, torch.Tensor], batch: dict[str, torch.Te
     )
 
     diagnostics = {
-        "next_state": float(terms["next_state"]),
-        "malicious": float(terms["malicious"]),
-        "risk": float(terms["risk"]),
-        "confidence": float(terms["confidence"]),
-        "total": float(total),
+        "next_state": float(terms["next_state"].detach()),
+        "malicious": float(terms["malicious"].detach()),
+        "risk": float(terms["risk"].detach()),
+        "confidence": float(terms["confidence"].detach()),
+        "total": float(total.detach()),
     }
     return total, diagnostics
 
