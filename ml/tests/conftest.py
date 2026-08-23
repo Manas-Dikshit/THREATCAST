@@ -123,7 +123,7 @@ def trained_artifacts(synthetic_export, tmp_path_factory):
     """
     from ml.src.inference.predictor import WorldModelPredictor
     from ml.src.training.train import save_artifacts
-    from ml.src.trainer import Trainer
+    from ml.src.training.trainer import Trainer
 
     cfg = make_tiny_config()
     artifacts_dir = tmp_path_factory.mktemp("artifacts")
