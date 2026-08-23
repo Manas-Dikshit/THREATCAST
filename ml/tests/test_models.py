@@ -52,8 +52,9 @@ class TestShapes:
             m(torch.randn(1, 7, 9))
 
     def test_attention_maps(self):
-        m = make_model(d_model=16, n_layers=2, n_heads=4)
-        out = m(torch.randn(1, 5, 9), need_attention=True)
+        m = make_model(d_model=16, n_layers=2, n_heads=4).eval()
+        with torch.no_grad():
+            out = m(torch.randn(1, 5, 9), need_attention=True)
         assert len(out["attentions"]) == 2
         for w in out["attentions"]:
             assert w.shape == (1, 5, 5)

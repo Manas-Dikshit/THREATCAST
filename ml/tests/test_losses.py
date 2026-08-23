@@ -24,7 +24,7 @@ def outputs():
         "latent": torch.zeros(2, 8),
         "next_state_pred": torch.zeros(2, 9),
         "malicious_logit": torch.tensor([10.0, -10.0]),  # confident WRONG predictions
-        "risk_logit": torch.tensor([-10.0, 10.0]),
+        "risk_logit": torch.tensor([10.0, -10.0]),
         "confidence_logit": torch.zeros(2),
         "attentions": [],
     }
