@@ -1,0 +1,22 @@
+flowchart TD
+    A["INPUT SOURCES<br/>• PCAP Files<br/>• NetFlow / IPFIX<br/>• CSV Flow Records<br/>• Authentication Logs"]
+    B["DATA INGESTION LAYER<br/>• Scapy / PyShark<br/>• CSV Parser<br/>• Flow Parser<br/>• Timestamp Synchronisation"]
+    C["FEATURE EXTRACTION LAYER<br/><b>FLOW-LEVEL</b><br/>• Src/Dst IP & Port<br/>• Protocol<br/>• Bytes / Packets<br/>• Flow Duration<br/>• TCP Flags<br/>• IAT Mean/Variance/Max<br/>• Bidirectional Ratio<br/><br/><b>PACKET-LEVEL</b><br/>• TTL Statistics<br/>• TCP Window<br/>• Fragmentation<br/>• Payload Size<br/>• Retransmissions<br/>• Port Scan Pattern"]
+    D["TIME WINDOW ENGINE<br/>Divide traffic into windows<br/><br/>t-4 → t-3 → t-2 → t-1 → t<br/><br/>Generate network state Sₜ"]
+    E["NETWORK STATE REPRESENTATION<br/><br/><b>Option A: Feature Vector</b><br/>Sₜ = [ports, flags, IAT, TTL, bytes, packets, duration, ratios, scans...]<br/><br/><b>Option B: Network Graph</b><br/>Nodes = IPs / Hosts<br/>Edges = Communication Flows"]
+    F["WORLD MODEL<br/><br/>Temporal Transformer / LSTM<br/><br/>S(t-n) → ... → S(t-1) → S(t)<br/>↓<br/>Latent Network State<br/>↓<br/>Learn transition dynamics<br/>↓<br/>P(S(t+1) | S(t))"]
+    G["FORWARD SIMULATOR<br/>S(t+1)<br/>S(t+2)<br/>S(t+3)<br/>...<br/>S(t+K)"]
+    H["ATTACK PREDICTOR<br/>• Infiltration Probability<br/>• Attack Stage Prediction"]
+    I["ATTACK STAGE MAPPER<br/><b>MITRE ATT&CK</b><br/>• Reconnaissance<br/>• Initial Access<br/>• Lateral Movement<br/>• Command & Control<br/>• Exfiltration"]
+    J["EXPLAINABILITY ENGINE<br/>• SHAP / Attention<br/><br/><b>Top contributing features:</b><br/>• SYN frequency<br/>• Destination port 445<br/>• IAT variance<br/>• TTL anomaly<br/>• Retransmissions"]
+    K["DEFENDER DASHBOARD<br/><b>Streamlit</b><br/><br/>• Risk Score<br/>• Attack Timeline<br/>• Future Prediction<br/>• MITRE Stage<br/>• Suspicious Flows<br/>• Explainability<br/>• Probability Graph"]
+
+    A --> B --> C --> D --> E --> F
+    F --> G
+    F --> H
+    G --> I
+    H --> I
+    I --> J --> K
+
+    classDef layer fill:#f7f7f7,stroke:#333,stroke-width:1.5px,color:#111;
+    class A,B,C,D,E,F,G,H,I,J,K layer;
