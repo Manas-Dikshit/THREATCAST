@@ -14,7 +14,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api.routers import ingestion, predictions, states
 from .api.routes import router
 from .core.config import get_settings
 from .core.errors import AppError, log_error
@@ -49,9 +48,7 @@ def create_app() -> FastAPI:
     from .services.model_service import ModelService
 
     app.state.model_service = ModelService(
-        artifacts_dir=settings.ml_artifacts_dir or str(
-            (settings.ml_model_path and __import__("pathlib").Path(settings.ml_model_path).parent)
-        ),
+        artifacts_dir=settings.ml_artifacts_dir,
         device=settings.ml_device,
     )
 
