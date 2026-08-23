@@ -179,9 +179,10 @@ def _opt_int(v) -> int | None:
     except TypeError:
         pass
     try:
-        return int(float(str(v).strip()))
+        port = int(float(str(v).strip()))
     except (ValueError, TypeError):
         return None
+    return port if 0 <= port <= 65535 else None
 
 
 def _opt_float(v) -> float | None:
