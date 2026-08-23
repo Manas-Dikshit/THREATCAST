@@ -1,33 +1,45 @@
 # THREATCAST Backend
 
-FastAPI + PostgreSQL service (Module 3).
-
-**Phase 1 status:** app shell with `/api/v1/health`, global error envelope, typed settings, and the canonical Pydantic contracts. Full API/DB arrives in later phases.
+FastAPI + SQLAlchemy + PostgreSQL service (Module 3). Serves the Phase 2 data
+pipeline and the Phase 3 world model behind the CONTRACT.md API.
 
 ## Layout
 
 ```
 app/
-├── api/           routers (/api/v1) — health implemented
-├── core/          settings (pydantic-settings), logging
-├── models/        SQLAlchemy ORM (later phase)
-├── schemas/       canonical contracts: NetworkState, sequence, PredictionResult, errors
-├── services/      orchestration (later phase)
-├── repositories/  DB access (later phase)
-└── main.py        FastAPI factory with global error handlers
+├── api/             routers (/api/v1): health, models, ingestion, predict, states
+├── core/            settings (pydantic-settings), logging, error hierarchy
+├── db/              engine/session factory + declarative Base
+├── models/          ORM tables: datasets, ingestion_jobs, network_states,
+│                    predictions, future_predictions, explanations, models
+├── schemas/         canonical contracts: NetworkState, sequence, PredictionResult
+├── repositories/    DB access layer
+├── services/        model_service (artifact loading), ingestion_service
+│                    (upload validation + pipeline), prediction_service
+└── main.py          FastAPI factory, CORS, request-id middleware, error handlers
+alembic/             migrations (baseline = full schema)
+tests/               pytest suite (SQLite in-memory/file DBs, tiny real model)
 ```
 
 ## Run
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --app-dir backend   # http://localhost:8000/api/v1/health
+# first time / after schema changes:
+python -m alembic upgrade head          # run from backend\
+uvicorn app.main:app --reload --app-dir backend   # http://localhost:8000/docs
 ```
+
+Environment (see `.env.example`): `DATABASE_URL`, `ML_ARTIFACTS_DIR`
+(default `./ml/artifacts`), `ML_DEVICE`, `CORS_ORIGINS`, `MAX_UPLOAD_SIZE_MB`.
 
 ## Test
 
 ```powershell
-pytest backend\tests -v
+pytest backend\tests -q
 ```
+
+Tests use SQLite and train a tiny real world model per session — no mocking of
+the ML path.
 
 The `schemas` package is the integration surface for all other modules (see CONTRACT.md).

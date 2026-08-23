@@ -31,6 +31,15 @@ Stop-Process -Id <pid>
 
 Smoke tests enforce the documented folder/config layout. If you intentionally restructure, update `tests/smoke/test_structure.py` **and** CONTRACT.md in the same change.
 
+## Backend (Phase 4)
+
+- `DATABASE_ERROR` responses — `DATABASE_URL` unreachable or migrations missing. Run `python -m alembic upgrade head` from `backend\`; check Postgres is up (`docker compose up postgres`).
+- `MODEL_NOT_LOADED` (503) on `/predict` — artifacts missing/corrupt at `ML_ARTIFACTS_DIR`. Train or copy a bundle first (`ml/artifacts/world_model.pt` + metadata); health shows the load error in `model.error`.
+- Upload rejected with `INVALID_INPUT` — extension must be `.csv/.pcap/.pcapng`, content must sniff as CSV header or PCAP magic, size ≤ `MAX_UPLOAD_SIZE_MB`.
+- `JOB_FAILED` with "No usable flow records" — CSV needs an ISO-8601 `timestamp` column (unix epoch ints are not parsed by the Phase 2 loader).
+- CORS errors in the browser — set `CORS_ORIGINS=http://localhost:5173` in `.env`.
+- SQLite vs Postgres: unit tests use SQLite automatically; only dev/deploy need Postgres.
+
 ## Dataset problems (future phases)
 
 CIC-IDS2018 files must be inspected first — column mismatches, infinities and duplicates are expected and handled by preprocessing rules in docs/MODEL.md.

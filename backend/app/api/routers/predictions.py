@@ -8,7 +8,7 @@ from ...schemas.network_state import NetworkStateSequence
 from ...schemas.prediction import PredictionResult as PredictionResultSchema
 from ...services.prediction_service import PredictionService
 
-router = APIRouter(prefix="/api/v1", tags=["predictions"])
+router = APIRouter(tags=["predictions"])
 
 
 @router.post("/predict", response_model=PredictionResultSchema)

@@ -141,21 +141,24 @@ def get_db_module():
     return m.get_db
 
 
-CSV_HEADER = ("timestamp,src_ip,dst_ip,src_port,dst_port,protocol,"
-              "total_bytes,total_packets,duration_s\n")
-
-
 def make_csv(n_flows: int = 40, start_epoch: int = 0) -> bytes:
+    """ISO-8601 timestamps (what the Phase 2 parser documents as supported)."""
+    import io
+    from datetime import datetime, timedelta, timezone
+
     rng = np.random.default_rng(11)
-    rows = [CSV_HEADER]
-    base_ts = 1_760_000_000 + start_epoch
+    buf = io.StringIO()
+    buf.write("timestamp,src_ip,dst_ip,src_port,dst_port,protocol,"
+              "total_bytes,total_packets,duration_s\n")
+    base_ts = datetime(2026, 6, 1, tzinfo=timezone.utc) + timedelta(seconds=start_epoch)
     for i in range(n_flows):
-        ts = base_ts + int(i // 4) * 10 + (i % 4)
-        rows.append(
-            f"{ts},10.0.0.{i % 5},10.0.1.{i % 3},{1000 + i},{80 if i % 3 else 443},"
-            f"{'tcp'},{rng.integers(100, 5000)},{rng.integers(5, 50)},0.05\n"
+        ts = base_ts + timedelta(seconds=(i // 4) * 10 + (i % 4))
+        buf.write(
+            f"{ts.isoformat()},10.0.0.{i % 5},10.0.1.{i % 3},{1000 + i},"
+            f"{80 if i % 3 else 443},tcp,{int(rng.integers(100, 5000))},"
+            f"{int(rng.integers(5, 50))},0.05\n"
         )
-    return "".join(rows).encode()
+    return buf.getvalue().encode()
 
 
 @pytest.fixture()

@@ -9,7 +9,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ...core.errors import ModelNotLoadedError
+from ..core.errors import ModelNotLoadedError
 
 logger = logging.getLogger("BACKEND")
 
@@ -74,12 +74,12 @@ class ModelService:
         try:
             result = self._predictor.predict(sequence)
         except ValueError as exc:
-            from ...core.errors import InvalidInputError
+            from ..core.errors import InvalidInputError
 
             raise InvalidInputError(str(exc)) from exc
         except Exception as exc:
             logger.exception("Inference failure")
-            from ...core.errors import AppError
+            from ..core.errors import AppError
 
             raise AppError("Inference failure", code_hint="INFERENCE_FAILED") from exc
         return result

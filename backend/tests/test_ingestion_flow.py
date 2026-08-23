@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta, timezone
 
-from tests.conftest import FEATURES, L, make_csv
+from backend.tests.conftest import FEATURES, L, make_csv
 
 
 def test_end_to_end_upload_to_prediction(client, csv_bytes):

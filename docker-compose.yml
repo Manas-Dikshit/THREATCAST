@@ -26,6 +26,14 @@ services:
       APP_ENV: ${APP_ENV:-development}
       DATABASE_URL: postgresql://threatcast:threatcast@postgres:5432/threatcast
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      ML_ARTIFACTS_DIR: /app/ml/artifacts
+      ML_DEVICE: ${ML_DEVICE:-auto}
+      TIME_WINDOW_SECONDS: ${TIME_WINDOW_SECONDS:-10}
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-500}
+    volumes:
+      # live model artifacts without image rebuild
+      - ./ml/artifacts:/app/ml/artifacts:ro
     ports:
       - "8000:8000"
     depends_on:

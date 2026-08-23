@@ -15,7 +15,7 @@ from ..models.tables import (
     NetworkStateRow,
     PredictionRow,
 )
-from ...schemas.prediction import PredictionResult
+from ..schemas.prediction import PredictionResult
 
 
 def new_id() -> str:
@@ -137,7 +137,7 @@ class PredictionRepository:
         )
 
     def to_result(self, row: PredictionRow) -> PredictionResult:
-        from ...schemas.prediction import (
+        from ..schemas.prediction import (
             FeatureContribution, FutureStateEntry, ModelInfo, PredictedStage,
         )
 

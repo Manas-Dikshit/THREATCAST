@@ -9,7 +9,7 @@ from ...schemas.network_state import (
     FlowSummary, NetworkState as NetworkStateSchema,
 )
 
-router = APIRouter(prefix="/api/v1", tags=["states"])
+router = APIRouter(tags=["states"])
 
 
 @router.get("/states/{state_id}", response_model=NetworkStateSchema)

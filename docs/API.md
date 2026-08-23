@@ -1,7 +1,7 @@
-# THREATCAST API Reference (planned)
+# THREATCAST API Reference
 
 Base URL: `http://localhost:8000` · Prefix: `/api/v1`
-Phase 1 implements only `/health`; all other endpoints are contracts for later backend phases.
+Interactive OpenAPI docs: `/docs` (Swagger UI), `/redoc`.
 
 ## Conventions
 
@@ -20,7 +20,10 @@ Phase 1 implements only `/health`; all other endpoints are contracts for later b
 }
 ```
 
-Error codes: `INVALID_INPUT` (422), `NOT_FOUND` (404), `PAYLOAD_TOO_LARGE` (413), `JOB_FAILED` (500), `MODEL_NOT_LOADED` (503), `INTERNAL_ERROR` (500).
+Error codes: `INVALID_INPUT` (422), `NOT_FOUND` (404), `PAYLOAD_TOO_LARGE` (413),
+`JOB_FAILED` (500), `MODEL_NOT_LOADED` (503), `DATABASE_ERROR` (500),
+`INTERNAL_ERROR` (500).
+Every response carries an `X-Request-ID` header.
 
 ---
 
@@ -28,51 +31,74 @@ Error codes: `INVALID_INPUT` (422), `NOT_FOUND` (404), `PAYLOAD_TOO_LARGE` (413)
 
 Liveness/readiness probe.
 
-- **Request**: none
 - **Response** 200:
 ```json
-{ "status": "ok", "service": "threatcast-backend" }
-```
-- **Errors**: none expected.
-
----
-
-## POST /api/v1/ingestion/upload
-
-Upload telemetry (PCAP / NetFlow-IPFIX / CSV flows / auth logs) and start an ingestion job.
-
-- **Request**: `multipart/form-data` with `file` (≤ `MAX_UPLOAD_SIZE_MB`) + optional `source_type` field (`pcap|netflow|csv|authlog`, default auto-detected).
-- **Response** 202:
-```json
-{ "job_id": "job_000123", "status": "queued" }
-```
-- **Errors**: `INVALID_INPUT` (unsupported type), `PAYLOAD_TOO_LARGE`.
-- Example:
-```powershell
-curl.exe -F "file=@sample.csv" -F "source_type=csv" http://localhost:8000/api/v1/ingestion/upload
+{
+  "status": "ok",
+  "service": "threatcast-backend",
+  "version": "0.4.0",
+  "database": "ok",
+  "model": {
+    "loaded": true,
+    "status": "loaded",
+    "model_version": "1.0.0",
+    "device": "cpu",
+    "sequence_length": 5,
+    "prediction_horizon": 3,
+    "error": null
+  }
+}
 ```
 
-## GET /api/v1/ingestion/jobs/{job_id}
+## GET /api/v1/models
 
-Ingestion job status/result.
+Active world-model metadata as recorded at load time.
 
 - **Response** 200:
 ```json
 {
-  "job_id": "job_000123",
-  "status": "completed",
-  "dataset_id": "ds_000001",
-  "states_generated": 864,
-  "error": null
+  "active": {
+    "status": "loaded", "name": "threatcast-world-model", "version": "1.0.0",
+    "artifact_path": ".../world_model.pt", "device": "cpu",
+    "sequence_length": 5, "prediction_horizon": 3, "loaded_at": "..."
+  },
+  "history": []
 }
 ```
+
+## POST /api/v1/ingestion/upload
+
+Upload telemetry, run the Phase 2 pipeline **and** the world model synchronously
+(job completes before the response returns).
+
+- **Request**: `multipart/form-data` with `file` (`csv|pcap|pcapng`, ≤ `MAX_UPLOAD_SIZE_MB`) + optional `source_type`.
+- **Response** 202: `{ "job_id": "job_ab12cd34", "status": "queued" }`
+- **Errors**: `INVALID_INPUT` (unsupported type/extension/malformed file), `PAYLOAD_TOO_LARGE`, `JOB_FAILED` (pipeline failure).
+```powershell
+curl.exe -F "file=@sample.csv" http://localhost:8000/api/v1/ingestion/upload
+```
+
+## GET /api/v1/ingestion/jobs/{job_id}
+
+Ingestion job status/result. `prediction_id` links the auto-generated forecast.
+
+- **Response** 200:
+```json
+{
+  "job_id": "job_ab12cd34", "filename": "upload_x.csv", "format": "csv",
+  "status": "completed", "dataset_id": "ds_...", "states_generated": 10,
+  "sequences_generated": 6, "prediction_id": "pred_...",
+  "error": null, "created_at": "...", "started_at": "...", "finished_at": "..."
+}
+```
+Statuses: `queued → processing → completed | failed`.
 - **Errors**: `NOT_FOUND`.
 
 ## POST /api/v1/predict
 
-Run world-model prediction on a network-state sequence.
+Run the world model on a state sequence and persist the full result.
 
-- **Request** body (`application/json`, schema = `NetworkStateSequence`, CONTRACT.md §6):
+- **Request** body = `NetworkStateSequence` (CONTRACT.md §6):
 ```json
 {
   "sequence_id": "seq_000001",
@@ -82,33 +108,30 @@ Run world-model prediction on a network-state sequence.
   "target_state": null
 }
 ```
-- **Response** 200: `PredictionResult` (CONTRACT.md §7):
-```json
-{
-  "prediction_id": "pred_123",
-  "timestamp": "2026-08-23T10:30:00Z",
-  "risk_score": 0.87,
-  "malicious_probability": 0.91,
-  "confidence": 0.84,
-  "predicted_stage": { "id": null, "name": null, "confidence": null, "source": null },
-  "future_states": [],
-  "feature_contributions": [],
-  "model": { "name": "threatcast-world-model", "version": "0.1.0" }
-}
-```
-- **Errors**: `INVALID_INPUT` (wrong sequence length), `MODEL_NOT_LOADED`.
+- **Response** 200: full `PredictionResult` (CONTRACT.md §7) incl.
+`risk_score`, `malicious_probability`, `confidence`, `future_states[]`,
+`feature_contributions[]`, `model{}`.
+- **Errors**: `INVALID_INPUT`, `MODEL_NOT_LOADED`.
+
+## GET /api/v1/predictions/{prediction_id}
+
+Fetch a stored prediction (same shape as POST /predict).
+
+- **Errors**: `NOT_FOUND`.
 
 ## GET /api/v1/predictions/{prediction_id}/timeline
 
-Prediction plus its forward-simulated future states over time.
+Prediction plus forward-simulated steps for charting.
 
 - **Response** 200:
 ```json
 {
-  "prediction_id": "pred_123",
+  "prediction_id": "pred_123", "generated_at": "...",
   "risk_timeline": [
-    { "step": 0, "timestamp": "2026-08-23T10:30:00Z", "risk_score": 0.87 },
-    { "step": 1, "timestamp": "2026-08-23T10:30:10Z", "risk_score": 0.89 }
+    { "step": 0, "timestamp": "...", "risk_score": 0.87,
+      "malicious_probability": 0.91, "confidence": 0.84 },
+    { "step": 1, "timestamp": "...", "risk_score": 0.87,
+      "malicious_probability": null, "confidence": 0.80 }
   ]
 }
 ```
@@ -116,11 +139,7 @@ Prediction plus its forward-simulated future states over time.
 
 ## GET /api/v1/states/{state_id}
 
-Fetch a stored canonical network state.
+Fetch a stored canonical network state (CONTRACT.md §5 shape; `flow_summary`
+aggregates are inside `features`).
 
-- **Response** 200: `NetworkState` object (CONTRACT.md §5).
 - **Errors**: `NOT_FOUND`.
-
----
-
-Interactive OpenAPI docs are served by FastAPI at `/docs` once the backend phase lands.

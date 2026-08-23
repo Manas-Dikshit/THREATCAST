@@ -10,6 +10,7 @@ from fastapi import APIRouter
 from sqlalchemy import text
 
 from ..core.config import get_settings
+from ..repositories.repositories import ModelRepository
 from ..schemas.api import HealthResponse, ModelsListResponse, ModelStatusInfo
 from .deps import DbSession, ModelSvc
 from .routers import ingestion, predictions, states

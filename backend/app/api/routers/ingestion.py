@@ -9,7 +9,7 @@ from ...schemas.api import JobStatusResponse, UploadResponse
 from ...services.ingestion_service import IngestionService
 from ...services.model_service import ModelService
 
-router = APIRouter(prefix="/api/v1", tags=["ingestion"])
+router = APIRouter(tags=["ingestion"])
 
 
 @router.post("/ingestion/upload", response_model=UploadResponse, status_code=202)
@@ -40,7 +40,7 @@ def job_status(job_id: str, db: DbSession) -> JobStatusResponse:
         dataset_id=job.dataset_id,
         states_generated=job.states_generated,
         sequences_generated=job.sequences_generated,
-        prediction_id=getattr(job.meta or {}, "prediction_id", None),
+        prediction_id=(job.meta or {}).get("prediction_id"),
         error=job.error_message,
         created_at=job.created_at,
         started_at=job.started_at,

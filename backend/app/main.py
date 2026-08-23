@@ -99,6 +99,15 @@ def create_app() -> FastAPI:
     @app.exception_handler(Exception)
     async def unhandled_error(request: Request, exc: Exception) -> JSONResponse:
         log_error(exc, _rid(request))
+        # database failures get their own contract code
+        try:
+            from sqlalchemy.exc import SQLAlchemyError
+
+            if isinstance(exc, SQLAlchemyError):
+                return error_response(request, "DATABASE_ERROR",
+                                      "Database operation failed", 500)
+        except ImportError:  # pragma: no cover
+            pass
         return error_response(request, "INTERNAL_ERROR",
                               "Internal server error", 500)
 

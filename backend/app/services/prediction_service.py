@@ -2,11 +2,12 @@
 
 import logging
 
-from ..core.errors import ModelNotLoadedError
-from ..models.tables import Dataset
+from ..core.errors import (
+    InvalidInputError, ModelNotLoadedError, NotFoundError,
+)
 from ..repositories.repositories import PredictionRepository
-from ...schemas.prediction import PredictionResult
-from ...schemas.network_state import NetworkStateSequence
+from ..schemas.network_state import NetworkStateSequence
+from ..schemas.prediction import PredictionResult
 
 logger = logging.getLogger("BACKEND")
 
@@ -24,8 +25,6 @@ class PredictionService:
                 "World model is not available", artifacts="ml/artifacts"
             )
         if not sequence.states:
-            from ..core.errors import InvalidInputError
-
             raise InvalidInputError("Sequence contains no states.")
         if len(sequence.states) != sequence.sequence_length:
             raise InvalidInputError(
@@ -44,8 +43,6 @@ class PredictionService:
     def get(self, prediction_id: str) -> tuple[PredictionResult, object]:
         row = self.repo.get_by_prediction_id(prediction_id)
         if row is None:
-            from ..core.errors import NotFoundError
-
             raise NotFoundError(f"Prediction '{prediction_id}' not found")
         return self.repo.to_result(row), row
 

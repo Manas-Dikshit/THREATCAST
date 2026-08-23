@@ -2,7 +2,7 @@
 
 import io
 
-from tests.conftest import make_csv
+from backend.tests.conftest import make_csv
 
 
 def _post(client, data: bytes, filename: str, **extra):
@@ -58,9 +58,10 @@ def test_oversize_rejected(client, monkeypatch):
 
     class FakeUpload:
         filename = "big.csv"
+        file = io.BytesIO(b"x" * 100)
 
         def read(self, n=-1):
-            return b"x" * 100
+            return self.file.read(n)
 
     with pytest.raises(PayloadTooLargeError):
         v.save_to_temp(FakeUpload(), __import__("pathlib").Path(__import__("tempfile").mkdtemp()))

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
-from tests.conftest import FEATURES, L
+from backend.tests.conftest import FEATURES, L
 
 
 def make_valid_sequence(seq_id: str = "seq_api_test"):
@@ -15,8 +15,8 @@ def make_valid_sequence(seq_id: str = "seq_api_test"):
         start = t0 + timedelta(seconds=10 * i)
         states.append({
             "state_id": f"state_{seq_id}_{i:06d}",
-            "timestamp_start": start,
-            "timestamp_end": start + timedelta(seconds=10),
+            "timestamp_start": start.isoformat(),
+            "timestamp_end": (start + timedelta(seconds=10)).isoformat(),
             "window_seconds": 10.0,
             "features": {n: float(rng.normal()) for n in FEATURES},
             "label": None,
