@@ -20,7 +20,7 @@ _FLAG_LETTERS = "FSRPAU"  # canonical output order
 class _FlowState:
     __slots__ = (
         "start", "end", "packets", "nbytes", "flags", "ttls", "windows",
-        "frag_count", "payloads", "seq_seen", "retrans",
+        "frag_count", "payloads", "seq_seen", "retrans", "src", "dst",
     )
 
     def __init__(self) -> None:
@@ -35,10 +35,15 @@ class _FlowState:
         self.payloads: list[int] = []
         self.seq_seen: set[tuple[bool, int]] = set()
         self.retrans = 0
+        # Initiator orientation: fixed by the FIRST packet seen on the flow.
+        self.src: tuple[str, int] | None = None
+        self.dst: tuple[str, int] | None = None
 
 
 def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
-    from scapy.utils import PcapReader, PcapNgReader
+    # scapy.all (not scapy.utils): importing the full package registers the
+    # layer classes needed to dissect link-layer types on read.
+    from scapy.all import PcapNgReader, PcapReader
 
     path = Path(path)
     reader_cls = PcapNgReader if _is_pcapng(path) else PcapReader
@@ -68,6 +73,10 @@ def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
             endpoints = ((src, sport), (dst, dport)) if forward else ((dst, dport), (src, sport))
             key = (*endpoints, proto)
             state = flows.setdefault(key, _FlowState())
+            if state.src is None:
+                # First packet defines the initiator (canonical src -> dst).
+                state.src = (src, sport)
+                state.dst = (dst, dport)
 
             ts = float(packet.time)
             state.start = ts if state.start is None else min(state.start, ts)
@@ -103,15 +112,15 @@ def parse_pcap(path: str | Path) -> tuple[list[FlowRecord], DatasetProfile]:
 
     records: list[FlowRecord] = []
     for key, st in sorted(flows.items(), key=lambda kv: kv[1].start or 0.0):
-        (a_ip, a_port), (b_ip, b_port), proto = key
+        proto = key[2]
         flag_string = "".join(c for c in _FLAG_LETTERS if c in st.flags) or None
         records.append(
             FlowRecord(
                 timestamp=_epoch_to_datetime(st.start),
-                src_ip=a_ip,
-                dst_ip=b_ip,
-                src_port=a_port or None,
-                dst_port=b_port or None,
+                src_ip=st.src[0],
+                dst_ip=st.dst[0],
+                src_port=st.src[1] or None,
+                dst_port=st.dst[1] or None,
                 protocol=proto,
                 total_bytes=float(st.nbytes),
                 total_packets=float(st.packets),

@@ -7,6 +7,7 @@ reported, and unavailable fields stay None.
 """
 
 from pathlib import Path
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -48,7 +49,9 @@ def _parse_timestamps(series: pd.Series) -> pd.Series:
     for fmt in _TIMESTAMP_FORMATS:
         parsed = pd.to_datetime(series, format=fmt, errors="coerce", utc=True)
         combined = combined.fillna(parsed)
-    inferred = pd.to_datetime(series, errors="coerce", utc=True)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        inferred = pd.to_datetime(series, errors="coerce", utc=True)
     return combined.fillna(inferred)
 
 
@@ -120,10 +123,14 @@ def build_flow_table(raw: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str], l
         df = df.drop(columns=flag_cols_present)
 
     # total_* fallback: sum forward/backward components when totals absent.
+    # Non-finite components count as missing (sum over observed values only).
+    def _finite(series: pd.Series) -> pd.Series:
+        return pd.to_numeric(series, errors="coerce").replace([np.inf, -np.inf], np.nan)
+
     if "total_bytes" not in df.columns and {"fwd_bytes", "bwd_bytes"} <= set(df.columns):
-        df["total_bytes"] = df["fwd_bytes"].fillna(0) + df["bwd_bytes"].fillna(0)
+        df["total_bytes"] = _finite(df["fwd_bytes"]).fillna(0) + _finite(df["bwd_bytes"]).fillna(0)
     if "total_packets" not in df.columns and {"fwd_packets", "bwd_packets"} <= set(df.columns):
-        df["total_packets"] = df["fwd_packets"].fillna(0) + df["bwd_packets"].fillna(0)
+        df["total_packets"] = _finite(df["fwd_packets"]).fillna(0) + _finite(df["bwd_packets"]).fillna(0)
     if "iat_var" not in df.columns and "iat_std" in df.columns:
         df["iat_var"] = df["iat_std"] ** 2
 

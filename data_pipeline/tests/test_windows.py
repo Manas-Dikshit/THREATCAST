@@ -90,10 +90,18 @@ def test_sequences_never_span_gaps():
         assert all(d == 10.0 for d in deltas)              # never mixes the two runs
 
 
-def test_horizon_zero_targets_next_state():
+def test_horizon_zero_targets_last_input_state():
+    """K=0 means target == S(t) itself (no future window beyond the inputs)."""
     seqs = build_sequences(_states(3), sequence_length=2, prediction_horizon=0)
-    assert seqs[0].target_state.state_id == "state_000003"
-    assert seqs[1].target_state is None
+    assert seqs[0].target_state.state_id == "state_000002"
+    assert seqs[1].target_state.state_id == "state_000003"
+
+
+def test_horizon_one_targets_next_state():
+    seqs = build_sequences(_states(4), sequence_length=2, prediction_horizon=1)
+    assert [s.state_id for s in seqs[0].states] == ["state_000001", "state_000002"]
+    assert seqs[0].target_state.state_id == "state_000003"   # one window after S(t)
+    assert seqs[2].target_state is None                      # beyond run end
 
 
 def test_invalid_configuration_rejected():

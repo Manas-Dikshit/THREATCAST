@@ -67,6 +67,10 @@ def run_pipeline(
     if out_dir is not None:
         splits = split_time_aware(sequences)
         train_states = [s for seq in splits["train"] for s in seq.states]
+        if not train_states:
+            # Too few windows for even one sequence: fall back to an
+            # early-70% chronological slice of states (still leak-free).
+            train_states = states[: int(len(states) * 0.7)]
         if fit_scaler_on_train and train_states:
             scaler = FeatureScaler(feature_schema.feature_names).fit(train_states)
             metadata = scaler.to_metadata(

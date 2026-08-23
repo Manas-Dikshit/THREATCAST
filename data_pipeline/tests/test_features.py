@@ -47,7 +47,7 @@ def test_pcap_level_features_aggregated(sample_records):
         sample_records(1, ttl_mean=60.0, tcp_window_mean=1000, total_packets=2),
     ]
     features, _ = aggregate_window(recs)
-    assert features["ttl_mean"] == pytest.approx(62.0)      # packet-weighted
+    assert features["ttl_mean"] == pytest.approx(63.333333)  # packet-weighted (64*10+60*2)/12
     assert features["ttl_variance"] == pytest.approx(0.5)
     assert features["retransmission_count"] == 2
     assert features["fragmentation_count"] == 1

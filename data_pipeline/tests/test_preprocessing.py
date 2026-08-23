@@ -21,7 +21,8 @@ def _table():
             "2026-01-01 10:00:02", "2026-01-01 10:00:01", "2026-01-01 10:00:01",
             "2026-01-01 10:00:03",
         ]),
-        "total_bytes": [100.0, np.inf, 100.0, -np.inf],
+        # rows 2+3 identical after +-inf -> NaN nulling -> exact duplicates
+        "total_bytes": [100.0, np.inf, np.inf, -np.inf],
         "total_packets": [5, 5, 5, 7],
         "label": ["BENIGN"] * 4,
     })
@@ -31,9 +32,9 @@ def test_cleaning_removes_duplicates_and_infinity():
     cleaned, stats = clean_flow_table(_table())
     assert stats.rows_in == 4 and stats.rows_out == 3
     assert stats.duplicates_removed == 1
-    assert stats.infinite_values_nulled == 2
+    assert stats.infinite_values_nulled == 3
     assert not np.isinf(cleaned["total_bytes"]).any()
-    assert cleaned["total_bytes"].isna().sum() == 2
+    assert cleaned["total_bytes"].isna().sum() == 2   # one NaN row removed as duplicate
 
 
 def test_cleaning_sorts_chronologically():
@@ -91,8 +92,8 @@ def test_feature_schema_union_sorted_deterministic():
 
 def test_leakage_scaler_uses_train_only(sample_records):
     """Fit on train window only; val/test must be transformed with frozen stats."""
-    train = [_state([10.0]), _state([20.0])]
-    val = [_state([900.0])]
+    train = [_state({"f": 10.0}), _state({"f": 20.0})]
+    val = [_state({"f": 900.0})]
     scaler = FeatureScaler(["f"]).fit(train)
     transformed_val = scaler.transform(val)[0][0]
     expected = (900.0 - 15.0) / 5.0     # train mean/std, NOT including val

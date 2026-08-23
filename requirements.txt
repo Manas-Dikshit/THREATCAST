@@ -16,6 +16,7 @@ pandas>=2.2
 
 # Data / network
 scapy>=2.5
+pyarrow>=15.0          # Parquet export for ML datasets
 
 # Testing / tooling
 pytest>=8.0

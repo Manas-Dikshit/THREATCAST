@@ -53,10 +53,11 @@ def split_time_aware(
     """Chronological split of sequences into train/val/test.
 
     The boundary is the last-input-state timestamp of each sequence; nothing is
-    shuffled, so no future information can leak into training.
+    shuffled, so no future information can leak into training. The remainder
+    after train+validation goes to test.
     """
-    if abs(train + validation - 1.0) > 1e-9:
-        raise ValueError("train + validation must equal 1.0 (rest goes to test).")
+    if not (0.0 < train < 1.0) or validation < 0.0 or train + validation >= 1.0:
+        raise ValueError("Require 0<train<1, validation>=0 and train+validation<1 (rest is test).")
     ordered = sorted(sequences, key=lambda s: s.states[-1].timestamp_start)
     n = len(ordered)
     cut_train = int(n * train)

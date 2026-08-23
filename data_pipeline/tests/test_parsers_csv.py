@@ -1,5 +1,7 @@
 """CSV parsing tests: generic flows, missing columns, malformed input, aliases."""
 
+from pathlib import Path
+
 import pytest
 
 from data_pipeline.src.ingestion.loader import detect_source_type, load_telemetry
@@ -54,8 +56,8 @@ def test_invalid_values_nulled_not_crashing(tmp_path):
         encoding="utf-8",
     )
     rec = load_telemetry(path).records[0]
-    assert rec.src_port in (None, 65535) or True  # coerced or nulled; must not crash
-    assert rec.total_bytes is None
+    assert rec.src_port is None and rec.dst_port is None   # out of range -> nulled
+    assert rec.total_bytes is None                          # garbage -> nulled
 
 
 def test_empty_dataset(empty_csv):

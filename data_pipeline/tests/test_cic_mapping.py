@@ -44,11 +44,11 @@ def test_labels_preserved_as_ground_truth(cic_csv):
 
 def test_duplicates_infinity_malformed_handled(cic_csv):
     result = load_telemetry(cic_csv)
-    # 4 raw rows -> malformed dropped (no timestamp), duplicate removed -> 3 records
+    # 5 raw rows -> malformed dropped (no timestamp), duplicate removed -> 3 records
     assert len(result.records) == 3
     warnings = " | ".join(result.profile.warnings).lower()
     assert "duplicate" in warnings
-    assert result.profile.row_count == 4   # raw row count before cleaning
+    assert result.profile.row_count == 5   # raw row count before cleaning
     timestamps = sorted(r.timestamp.isoformat() for r in result.records)
     assert timestamps[0] < timestamps[-1]
 

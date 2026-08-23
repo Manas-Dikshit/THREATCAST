@@ -30,9 +30,23 @@ cd frontend; npm install; cd ..
 | Frontend dev server | `cd frontend; npm run dev` |
 | All services | `docker compose up --build` |
 | Foundation tests | `pytest tests\smoke -v` |
-| Backend tests | `pytest backend\tests -v` |
-| Frontend tests | `cd frontend; npm test` |
+| Data pipeline tests | `pytest data_pipeline\tests -v` |
+| Full test suite | `pytest -v` |
+| Run data pipeline (CSV) | `python -m data_pipeline.cli --input <file.csv> --out out\ml_dataset` |
+| Run data pipeline (PCAP) | `python -m data_pipeline.cli --input <file.pcap> --out out\ml_dataset` |
+| Profile only, no export | add `--profile-only` |
 | Full validation | `.\scripts\validation\validate.ps1` |
+
+### Data pipeline example
+
+```powershell
+python -m data_pipeline.cli --input data\flows.csv --out out\ml_dataset `
+    --window 10 --seq-len 5 --horizon 3 --source-name cic_ids2018
+```
+
+Produces `states.parquet`, `sequences.jsonl`, `tensors.npz`, `feature_schema.json`,
+`preprocessing_metadata.json`, `label_mappings.json`, `dataset_profile.json`.
+See `data_pipeline/README.md` for the full pipeline documentation.
 
 ## Module boundaries
 
