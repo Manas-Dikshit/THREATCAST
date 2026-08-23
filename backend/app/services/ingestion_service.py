@@ -129,9 +129,7 @@ class IngestionService:
                 dataset_id, n_states, n_seqs = self._run_pipeline(
                     path, fmt, size, source_name, workdir, job
                 )
-                prediction_id = self._predict_latest(
-                    dataset_id, model_service
-                )
+                prediction_id = self._predict_latest(job, dataset_id, model_service)
                 self.jobs.set_status(job, "COMPLETED")
                 self.db.commit()
                 return {
@@ -181,12 +179,12 @@ class IngestionService:
         self.db.flush()
         return dataset.id, len(rows), len(result.sequences)
 
-    def _predict_latest(self, dataset_id: str | None, model_service) -> str | None:
+    def _predict_latest(self, job, dataset_id: str | None, model_service) -> str | None:
         """Run the world model on the most recent sequence of this dataset."""
         if model_service is None or not model_service.status.loaded:
             logger.info("Model unavailable - skipping post-ingestion prediction")
             return None
-        from ...ml_bridge import latest_sequence_for_dataset
+        from ..ml_bridge import latest_sequence_for_dataset
 
         sequence = latest_sequence_for_dataset(self.db, dataset_id)
         if sequence is None:
@@ -196,6 +194,8 @@ class IngestionService:
         result = PredictionService(self.db, model_service).predict_and_store(
             sequence, dataset_id=dataset_id
         )
+        job.meta = {**(job.meta or {}), "prediction_id": result.prediction_id}
+        self.db.flush()
         return result.prediction_id
 
 
