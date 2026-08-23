@@ -88,17 +88,33 @@ class TestRollout:
             assert e.timestamp == last_end + timedelta(seconds=10 * k)
 
     def test_autoregressive_feedback_consistency(self, predictor):
-        """Rollout step 2 must equal a direct prediction from a window whose
-        last state IS rollout step 1 — proving predictions are fed back."""
+        """Rollout step 2 must equal a direct prediction from the SLID window
+        [S(t-2)..S(t), S(t+1)] — proving predictions are actually fed back."""
         import copy
+        from datetime import timedelta
 
         import numpy as np
 
         seq = benign_sequence(np.random.default_rng(9))
         entries = predictor.rollout(seq, horizon=2)
 
-        seq2 = copy.deepcopy(seq)
-        seq2.states[-1].features = dict(entries[0].features)  # append S(t+1), drop S(t-3)
+        # rebuild the slid window manually: drop oldest, append predicted state
+        shifted = copy.deepcopy(seq.states[-1])
+        shifted.state_id = f"{seq.sequence_id}_sim_1"
+        shifted.timestamp_start = seq.states[-1].timestamp_end
+        shifted.timestamp_end = shifted.timestamp_start + timedelta(
+            seconds=seq.window_seconds or 10
+        )
+        shifted.features = dict(entries[0].features)
+
+        from data_pipeline.src.schemas.network_state import NetworkStateSequence
+
+        seq2 = NetworkStateSequence(
+            sequence_id=f"{seq.sequence_id}_slid",
+            states=seq.states[1:] + [shifted],
+            sequence_length=L,
+            window_seconds=seq.window_seconds,
+        )
         step2_direct = predictor.predict_next_state(seq2)
 
         # Tolerance covers float32 math plus the 6-decimal denorm->renorm
