@@ -4,8 +4,7 @@ Kept schema-identical to backend/app/schemas/network_state.py; a compat test
 guards drift between the two implementations.
 """
 
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -49,18 +48,4 @@ class NetworkStateSequence(BaseModel):
     target_state: Optional[NetworkState] = None
 
 
-def new_state_id() -> str:
-    return f"state_{uuid.uuid4().hex[:12]}"
-
-
-def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-__all__ = [
-    "NetworkState",
-    "NetworkStateSequence",
-    "FlowSummary",
-    "new_state_id",
-    "utcnow",
-]
+__all__ = ["NetworkState", "NetworkStateSequence", "FlowSummary"]
