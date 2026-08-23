@@ -34,7 +34,7 @@ def _looks_like_cic(path: Path) -> bool:
     """Sniff the first line for CIC-style headers (never trusted blindly — just a hint)."""
     with open(path, encoding="utf-8", errors="replace") as fh:
         first = fh.readline()
-    from .parsers.columns import normalize_header
+    from ..parsers.columns import normalize_header
 
     tokens = {normalize_header(token) for token in first.split(",")}
     return len(tokens & _CIC_SIGNATURES) >= 2
