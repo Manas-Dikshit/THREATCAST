@@ -82,7 +82,8 @@ class WorldModelPredictor:
         return torch.from_numpy(arr).unsqueeze(0).to(self.device)
 
     def _forward_heads(self, x: torch.Tensor) -> dict:
-        out = self.model(x)
+        with torch.no_grad():
+            out = self.model(x)
         sig = lambda t: float(torch.sigmoid(t)[0])  # noqa: E731
         return {"risk": sig(out["risk_logit"]), "malicious": sig(out["malicious_logit"]),
                 "confidence": sig(out["confidence_logit"]),
