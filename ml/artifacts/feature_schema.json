@@ -1,0 +1,1 @@
+{"schema_version": 1, "source": "synthetic", "feature_names": ["flow_count", "packet_count", "byte_count", "syn_ratio", "ack_ratio", "mean_iat", "iat_variance", "unique_dst_ports", "port_scan_score"]}

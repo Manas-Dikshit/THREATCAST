@@ -1,0 +1,65 @@
+{
+  "model_version": "1.0.0",
+  "architecture": "temporal_transformer",
+  "feature_ordering": [
+    "flow_count",
+    "packet_count",
+    "byte_count",
+    "syn_ratio",
+    "ack_ratio",
+    "mean_iat",
+    "iat_variance",
+    "unique_dst_ports",
+    "port_scan_score"
+  ],
+  "sequence_length": 5,
+  "prediction_horizon": 3,
+  "training_config": {
+    "epochs": 30,
+    "batch_size": 32,
+    "grad_accumulation": 1,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "amp": true,
+    "seed": 42,
+    "loss_weights": {
+      "next_state": 1.0,
+      "malicious": 1.0,
+      "risk": 0.5,
+      "confidence": 0.2
+    }
+  },
+  "model_config": {
+    "d_model": 128,
+    "n_layers": 4,
+    "n_heads": 4,
+    "d_ff": 256,
+    "dropout": 0.1
+  },
+  "parameters": {
+    "trainable": 533900,
+    "total": 533900
+  },
+  "dataset": {
+    "source_dir": "C:\\Users\\manas\\AppData\\Local\\Temp\\tc3_export"
+  },
+  "metrics": {
+    "epoch": 11,
+    "train_next_state": 0.035214999690651894,
+    "train_malicious": 0.33375320583581924,
+    "train_risk": 0.39064693450927734,
+    "train_confidence": 0.10097486153244972,
+    "train_total": 0.5844866633415222,
+    "val_loss": 1.4717175960540771
+  },
+  "split_sizes": {
+    "train": 44,
+    "val": 10,
+    "test": 10
+  },
+  "best_val_loss": 1.2692126035690308,
+  "test_loss": 1.8591020107269287,
+  "pytorch_version": "2.13.0+cpu",
+  "device": "cpu",
+  "timestamp_utc": "2026-08-23T13:56:01.293650+00:00"
+}

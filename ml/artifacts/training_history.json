@@ -1,0 +1,101 @@
+[
+  {
+    "epoch": 1,
+    "train_next_state": 0.28129757940769196,
+    "train_malicious": 0.6718279421329498,
+    "train_risk": 0.7624967694282532,
+    "train_confidence": 0.15168217197060585,
+    "train_total": 1.3647103309631348,
+    "val_loss": 1.3504788875579834
+  },
+  {
+    "epoch": 2,
+    "train_next_state": 0.167522594332695,
+    "train_malicious": 0.5905983448028564,
+    "train_risk": 0.5972849428653717,
+    "train_confidence": 0.0629288349300623,
+    "train_total": 1.069349229335785,
+    "val_loss": 1.2789499759674072
+  },
+  {
+    "epoch": 3,
+    "train_next_state": 0.05952667072415352,
+    "train_malicious": 0.5708986818790436,
+    "train_risk": 0.5702752023935318,
+    "train_confidence": 0.07138307020068169,
+    "train_total": 0.9298395812511444,
+    "val_loss": 1.2692126035690308
+  },
+  {
+    "epoch": 4,
+    "train_next_state": 0.05566813424229622,
+    "train_malicious": 0.5636305212974548,
+    "train_risk": 0.608409583568573,
+    "train_confidence": 0.0645486880093813,
+    "train_total": 0.9364131689071655,
+    "val_loss": 1.3037363290786743
+  },
+  {
+    "epoch": 5,
+    "train_next_state": 0.06279290653765202,
+    "train_malicious": 0.5988458693027496,
+    "train_risk": 0.5620854794979095,
+    "train_confidence": 0.043264878913760185,
+    "train_total": 0.9513345062732697,
+    "val_loss": 1.3492796421051025
+  },
+  {
+    "epoch": 6,
+    "train_next_state": 0.04379498027265072,
+    "train_malicious": 0.5204160064458847,
+    "train_risk": 0.5961418151855469,
+    "train_confidence": 0.07736798003315926,
+    "train_total": 0.8777555227279663,
+    "val_loss": 1.437461018562317
+  },
+  {
+    "epoch": 7,
+    "train_next_state": 0.039681652560830116,
+    "train_malicious": 0.47985441982746124,
+    "train_risk": 0.49613891541957855,
+    "train_confidence": 0.10941674187779427,
+    "train_total": 0.7894888520240784,
+    "val_loss": 1.502794623374939
+  },
+  {
+    "epoch": 8,
+    "train_next_state": 0.029912419617176056,
+    "train_malicious": 0.4694951921701431,
+    "train_risk": 0.48840801417827606,
+    "train_confidence": 0.12513785436749458,
+    "train_total": 0.7686392068862915,
+    "val_loss": 1.4997937679290771
+  },
+  {
+    "epoch": 9,
+    "train_next_state": 0.032975081354379654,
+    "train_malicious": 0.44673313200473785,
+    "train_risk": 0.46799154579639435,
+    "train_confidence": 0.09083810821175575,
+    "train_total": 0.7318716645240784,
+    "val_loss": 1.4746757745742798
+  },
+  {
+    "epoch": 10,
+    "train_next_state": 0.039160335436463356,
+    "train_malicious": 0.40971633791923523,
+    "train_risk": 0.45792362093925476,
+    "train_confidence": 0.0724574588239193,
+    "train_total": 0.692330002784729,
+    "val_loss": 1.447830319404602
+  },
+  {
+    "epoch": 11,
+    "train_next_state": 0.035214999690651894,
+    "train_malicious": 0.33375320583581924,
+    "train_risk": 0.39064693450927734,
+    "train_confidence": 0.10097486153244972,
+    "train_total": 0.5844866633415222,
+    "val_loss": 1.4717175960540771
+  }
+]
