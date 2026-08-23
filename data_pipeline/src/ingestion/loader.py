@@ -60,8 +60,7 @@ def load_telemetry(path: str | Path) -> LoadResult:
 
     cleaned, stats = clean_flow_table(table)
     if stats.duplicates_removed:
-        profile.duplicate_rows = stats.duplicates_removed
-        profile.warnings.append(f"Removed {stats.duplicates_removed} duplicate rows.")
+        profile.warnings.append(f"Removed {stats.duplicates_removed} duplicate rows during normalization.")
     if stats.infinite_values_nulled:
         profile.warnings.append(f"Nulled {stats.infinite_values_nulled} infinite values.")
     if stats.malformed_rows_dropped:
