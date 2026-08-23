@@ -35,7 +35,7 @@ def health(db: DbSession, model_service: ModelSvc) -> HealthResponse:
     return HealthResponse(
         status="ok",
         service="threatcast-backend",
-        version=get_settings().model_config.get("title", None) or "0.1.0",
+        version="0.1.0",
         model=live,
         database=database,
     )
