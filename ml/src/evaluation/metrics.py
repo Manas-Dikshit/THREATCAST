@@ -34,7 +34,7 @@ def temporal_metrics(y_true: np.ndarray, y_pred: np.ndarray,
     var = y_true.var(axis=0)
     ss_res = (err**2).sum(axis=0)
     ss_tot = ((y_true - y_true.mean(axis=0)) ** 2).sum(axis=0)
-    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else np.full_like(mse, np.nan)
+    r2 = np.where(ss_tot > 0, 1.0 - ss_res / np.where(ss_tot > 0, ss_tot, 1.0), np.nan)
 
     per_feature = sorted(
         ({"feature": n, "mse": float(m), "mae": float(a)}
