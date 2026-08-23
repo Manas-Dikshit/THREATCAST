@@ -113,8 +113,20 @@ class WorldModelConfig:
             for key, val in section.items():
                 key = key.replace("-", "_")
                 if key in known and val is not None:
-                    cur = getattr(target, key)
-                    setattr(target, key, type(cur)(val) if cur is not None and not isinstance(cur, bool) or isinstance(val, bool) else val)
+                    setattr(target, key, _coerce(getattr(target, key), val))
+
+
+def _coerce(current, value):
+    """Coerce YAML/env values into the field's existing type (bool-safe)."""
+    target_type = type(current)
+    if isinstance(current, bool) or isinstance(value, str) and str(value).lower() in {"true", "false"}:
+        if isinstance(value, str):
+            return value.lower() in {"true", "1", "yes", "on"}
+        return bool(value)
+    try:
+        return target_type(value)
+    except (TypeError, ValueError):
+        return value
 
 
 __all__ = ["WorldModelConfig", "ModelConfig", "SequenceConfig", "TrainingConfig", "LossWeights"]
