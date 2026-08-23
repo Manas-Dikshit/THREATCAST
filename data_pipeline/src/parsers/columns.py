@@ -35,6 +35,7 @@ ALIASES: dict[str, set[str]] = {
     "flag_psh": {"pshflagcnt", "pshflagcount", "tcppshflagcount"},
     "flag_urg": {"urgflagcnt", "urgflagcount", "tcpurgflagcount"},
     "label": {"label", "attack", "class", "category", "attacktype"},
+    "flags": {"flags", "tcpflags", "tcpflag", "flowflags", "flagstring"},
 }
 
 # CIC-IDS2018 duration/IAT columns are expressed in microseconds.
