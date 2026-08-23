@@ -40,7 +40,7 @@ class ModelService:
             version = self._predictor.model_version
             self._status = ModelStatus(
                 loaded=True, version=version, device=str(self._predictor.device),
-                sequence_length=self._predictor.horizon * 0 + getattr(self._predictor.model, "sequence_length", 5),
+                sequence_length=getattr(self._predictor.model, "sequence_length", 5),
                 prediction_horizon=self._predictor.horizon,
                 artifacts_dir=self.artifacts_dir,
                 metadata_file=meta_path.name if meta_path.exists() else None,
