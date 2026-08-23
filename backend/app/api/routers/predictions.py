@@ -1,6 +1,6 @@
 """POST /predict, GET /predictions/{id}, GET /predictions/{id}/timeline."""
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
 
 from ..deps import DbSession, ModelSvc
 from ...schemas.api import TimelineResponse, TimelineStep
@@ -13,9 +13,9 @@ router = APIRouter(prefix="/api/v1", tags=["predictions"])
 
 @router.post("/predict", response_model=PredictionResultSchema)
 def predict(
-    sequence: NetworkStateSequence = Body(...),
-    db: DbSession = None,
-    model_service: ModelSvc = None,
+    sequence: NetworkStateSequence,
+    db: DbSession,
+    model_service: ModelSvc,
 ) -> PredictionResultSchema:
     """Run the world model on a state sequence; persists the full result."""
     service = PredictionService(db, model_service)
