@@ -1,23 +1,40 @@
-# THREATCAST model configuration (consumed by later ml phases)
-# Values mirror .env.example defaults; env vars take precedence.
+# THREATCAST world-model configuration (Phase 3).
+# YAML values are defaults; environment variables override
+# (MODEL_LAYERS, MODEL_D_MODEL, MODEL_HEADS, MODEL_DROPOUT,
+#  ML_SEQUENCE_LENGTH, ML_PREDICTION_HORIZON, TRAIN_EPOCHS,
+#  TRAIN_BATCH_SIZE, TRAIN_LR, TRAIN_DEVICE, TRAIN_SEED, TRAIN_AMP).
 
 model:
   name: threatcast-world-model
-  version: 0.1.0
-  backbone: temporal_transformer   # baseline alternative: lstm
-  layers: 4
-  d_model: 128
-  heads: 4
+  version: "1.0.0"
+  backbone: temporal_transformer   # temporal_transformer | lstm (baseline)
+  d_model: 128                     # embedding dimension
+  n_layers: 4                      # encoder blocks
+  n_heads: 4                       # attention heads
+  d_ff: 256                        # feed-forward width
   dropout: 0.1
 
 sequence:
-  length: 5          # ML_SEQUENCE_LENGTH
-  prediction_horizon: 3  # ML_PREDICTION_HORIZON
+  length: 5                # L = states per input window (ML_SEQUENCE_LENGTH)
+  prediction_horizon: 3    # K = rollout steps (ML_PREDICTION_HORIZON)
 
 training:
-  device: auto       # auto | cuda | cpu
-  precision: fp16    # AMP on CUDA
-  batch_size: 32
-  grad_accumulation: 1
-  num_workers: 2
-  checkpoint_dir: ./ml/checkpoints
+  epochs: 30
+  batch_size: 32           # sized for RTX 3050 6GB at d_model=128, F~20-40
+  grad_accumulation: 1     # raise to simulate larger batches on small VRAM
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  amp: true                # mixed precision; auto-disabled on CPU
+  device: auto             # auto | cuda | cpu
+  seed: 42
+  checkpoint_every: 5      # epochs between latest.pt refreshes
+  early_stopping_patience: 8
+  val_fraction: 0.15       # chronological middle split
+  test_fraction: 0.15      # chronological tail, never touched by training
+  num_workers: 0
+
+loss_weights:
+  next_state: 1.0          # world-model term (temporal dynamics)
+  malicious: 1.0           # classification head
+  risk: 0.5                # separate calibration head
+  confidence: 0.2          # self-consistency of next-state forecast
