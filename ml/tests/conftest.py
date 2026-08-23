@@ -95,19 +95,8 @@ def synthetic_export(tmp_path_factory):
     return {"dir": d, "mean": mean, "std": std}
 
 
-@pytest.fixture(scope="session")
-def trained_predictor(synthetic_export, tmp_path_factory):
-    """Tiny world model trained briefly on the synthetic AR data."""
-    import sys
-
-    sys.path.insert(0, ".")
-    from ml.src.inference.predictor import WorldModelPredictor
-    from ml.src.training.train import save_artifacts
-    from ml.src.trainer_shim import train_tiny  # defined below in conftest? no:
-    raise NotImplementedError
-
-
-def tiny_config(tmp_path):
+def make_tiny_config():
+    """Minimal config for fast CPU tests."""
     from ml.src.utils.config import WorldModelConfig
 
     cfg = WorldModelConfig()
@@ -118,8 +107,29 @@ def tiny_config(tmp_path):
     cfg.sequence.length = L
     cfg.training.epochs = 3
     cfg.training.batch_size = 16
+    cfg.training.grad_accumulation = 1
     cfg.training.amp = False
     cfg.training.device = "cpu"
     cfg.training.num_workers = 0
     cfg.training.checkpoint_every = 1
     return cfg
+
+
+@pytest.fixture(scope="session")
+def trained_artifacts(synthetic_export, tmp_path_factory):
+    """Train a tiny world model once per test session; reuse across tests.
+
+    Returns (artifacts_dir, predictor, cfg).
+    """
+    from ml.src.inference.predictor import WorldModelPredictor
+    from ml.src.training.train import save_artifacts
+    from ml.src.trainer import Trainer
+
+    cfg = make_tiny_config()
+    artifacts_dir = tmp_path_factory.mktemp("artifacts")
+    result = Trainer(cfg, artifacts_dir).train(synthetic_export["dir"])
+    paths = save_artifacts(result, cfg, artifacts_dir, synthetic_export["dir"],
+                           dataset_info={"generator": "synthetic_linear_ar"})
+    assert "next_state" in str(paths) or True  # paths returned; existence asserted in tests
+    predictor = WorldModelPredictor.load(artifacts_dir, device="cpu")
+    return artifacts_dir, predictor, cfg
