@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+*.local
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# ML artifacts (large binaries stay out of git)
+ml/artifacts/*.pt
+ml/checkpoints/*
+!ml/artifacts/.gitkeep
+!ml/checkpoints/.gitkeep
+
+# Data (datasets are supplied manually, never committed)
+data/
+*.pcap
+*.pcapng
+*.csv
+!integration/fixtures/**
+
+# Notebooks
+.ipynb_checkpoints/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log
