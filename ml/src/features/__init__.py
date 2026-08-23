@@ -1,1 +1,1 @@
-﻿"""THREATCAST module placeholder - implemented in a later phase."""
+"""Feature extraction lives in data_pipeline (Phase 2); ML consumes its output."""

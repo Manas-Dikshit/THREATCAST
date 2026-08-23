@@ -1,0 +1,103 @@
+{
+  "timestamp_utc": "2026-08-23T13:56:41.632949+00:00",
+  "n_sequences": 64,
+  "test_size": 10,
+  "logistic_regression_baseline": {
+    "accuracy": 0.4,
+    "precision": 0.3333333333333333,
+    "recall": 0.2,
+    "f1": 0.25,
+    "fpr": 0.4,
+    "confusion_matrix": [
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        1
+      ]
+    ],
+    "n_samples": 10
+  },
+  "world_model": {
+    "temporal_next_state": {
+      "next_state_mse": 0.019059009850025177,
+      "next_state_mae": 0.10847586393356323,
+      "next_state_r2": -0.21328064799308777,
+      "worst_features_mse": [
+        {
+          "feature": "syn_ratio",
+          "mse": 0.042579326778650284,
+          "mae": 0.16195949912071228
+        },
+        {
+          "feature": "unique_dst_ports",
+          "mse": 0.03475015237927437,
+          "mae": 0.17463789880275726
+        },
+        {
+          "feature": "port_scan_score",
+          "mse": 0.02067532017827034,
+          "mae": 0.12927211821079254
+        },
+        {
+          "feature": "packet_count",
+          "mse": 0.018466191366314888,
+          "mae": 0.11173124611377716
+        },
+        {
+          "feature": "flow_count",
+          "mse": 0.017192257568240166,
+          "mae": 0.10975801944732666
+        }
+      ],
+      "best_features_mse": [
+        {
+          "feature": "ack_ratio",
+          "mse": 0.006041168235242367,
+          "mae": 0.05408164858818054
+        },
+        {
+          "feature": "iat_variance",
+          "mse": 0.006831361446529627,
+          "mae": 0.066881462931633
+        },
+        {
+          "feature": "mean_iat",
+          "mse": 0.007935592904686928,
+          "mae": 0.06898747384548187
+        },
+        {
+          "feature": "byte_count",
+          "mse": 0.017059721052646637,
+          "mae": 0.09897343069314957
+        },
+        {
+          "feature": "flow_count",
+          "mse": 0.017192257568240166,
+          "mae": 0.10975801944732666
+        }
+      ],
+      "n_samples": 10
+    },
+    "malicious_classification": {
+      "accuracy": 0.4,
+      "precision": 0.3333333333333333,
+      "recall": 0.2,
+      "f1": 0.25,
+      "fpr": 0.4,
+      "confusion_matrix": [
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          1
+        ]
+      ],
+      "n_samples": 10
+    }
+  }
+}
