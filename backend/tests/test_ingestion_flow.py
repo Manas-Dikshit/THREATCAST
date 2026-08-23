@@ -67,26 +67,20 @@ def test_malformed_csv_marks_job_failed(client):
 
 
 def test_state_endpoint_round_trip(client, csv_bytes):
-    import json as _json
+    from datetime import timedelta
 
-    from app.schemas.network_state import NetworkState
-
-    # direct persistence path: create a dataset + one state through repositories
-    from app.db.session import get_db
+    from app.models.tables import NetworkStateRow
     from app.repositories.repositories import DatasetRepository, StateRepository
-    db = next(iter(client.app.dependency_overrides.values())(), None)
-    # use the overridden dependency directly
-    override = client.app.dependency_overrides[get_db]
+
+    override = client.app.dependency_overrides[next(iter(client.app.dependency_overrides))]
     db = next(override())
     now = datetime.now(timezone.utc)
     ds = DatasetRepository(db).create(filename="t.csv", file_format="csv")
-    row = dict(
+    StateRepository(db).add(NetworkStateRow(
         state_id="state_test_000001", dataset_id=ds.id,
         timestamp_start=now, timestamp_end=now + timedelta(seconds=10),
         window_seconds=10.0, features={"flow_count": 12.0},
-    )
-    StateRepository(db).add(type("R", (), row)() if False else __import__(
-        "app.models.tables", fromlist=["NetworkStateRow"]).NetworkStateRow(**row))
+    ))
     db.commit()
 
     got = client.get("/api/v1/states/state_test_000001")
