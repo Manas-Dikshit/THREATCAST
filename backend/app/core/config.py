@@ -17,8 +17,12 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://threatcast:threatcast@localhost:5432/threatcast"
 
+    # Comma-separated allowed origins; "*" disables origin checking (dev only).
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+
     ml_model_path: str = "./ml/artifacts/world_model.pt"
     ml_metadata_path: str = "./ml/artifacts/model_metadata.json"
+    ml_artifacts_dir: str = "./ml/artifacts"
     ml_device: str = "auto"
     ml_sequence_length: int = 5
     ml_prediction_horizon: int = 3
