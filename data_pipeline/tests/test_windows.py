@@ -83,14 +83,11 @@ def test_sequence_creation_and_target():
 def test_sequences_never_span_gaps():
     states = _states(3) + _states(3, start_offset_s=100)   # gap between the two runs
     seqs = build_sequences(states, sequence_length=2, prediction_horizon=0)
-    assert all(len({s.states[0].timestamp_start.date() for s in [seq]}) == 1 for seq in seqs)
-    inputs_first = [s.timestamp_start for s in seqs[0].states]
-    inputs_all = [ts for seq in seqs for ts in inputs_first[:1]]
-    # no sequence mixes the two runs
+    assert seqs
     for seq in seqs:
         stamps = [s.timestamp_start for s in seq.states]
         deltas = [(b - a).total_seconds() for a, b in zip(stamps, stamps[1:])]
-        assert all(d == 10.0 for d in deltas)
+        assert all(d == 10.0 for d in deltas)              # never mixes the two runs
 
 
 def test_horizon_zero_targets_next_state():
@@ -124,11 +121,9 @@ def test_schema_validation_errors():
 
     t = datetime.now(timezone.utc)
     with pytest.raises(ValidationError):
-        NetworkState(timestamp_start=t, timestamp_end=t)          # missing state_id
-    with pytest.raises(ValidationError):
-        NetworkStateSequence(sequence_id="s")                     # ok actually; check below
-    seq = NetworkStateSequence(sequence_id="seq_000001")
-    assert seq.sequence_length == 5 and seq.target_state is None
+        NetworkState(timestamp_start=t, timestamp_end=t)      # missing state_id
+    seq = NetworkStateSequence(sequence_id="seq_000001")       # contract defaults
+    assert seq.sequence_length == 5 and seq.target_state is None and seq.states == []
 
 
 def test_open_feature_dict_extension():
