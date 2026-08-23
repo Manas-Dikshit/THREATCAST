@@ -11,7 +11,7 @@ knowledge of torch/model internals.
 
 import json
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -134,6 +134,7 @@ class WorldModelPredictor:
         contributions = self.attribute_features(sequence) if explain else []
         return PredictionResult(
             prediction_id=f"pred_{uuid.uuid4().hex[:12]}",
+            timestamp=datetime.now(timezone.utc),
             risk_score=round(heads["risk"], 4),
             malicious_probability=round(heads["malicious"], 4),
             confidence=round(heads["confidence"], 4),

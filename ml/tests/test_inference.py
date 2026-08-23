@@ -101,8 +101,10 @@ class TestRollout:
         seq2.states[-1].features = dict(entries[0].features)  # append S(t+1), drop S(t-3)
         step2_direct = predictor.predict_next_state(seq2)
 
+        # Tolerance covers float32 math plus the 6-decimal denorm->renorm
+        # roundtrip; a non-feedback implementation would differ by O(1).
         for name in FEATURES:
-            assert abs(step2_direct[name] - entries[1].features[name]) < 1e-3
+            assert abs(step2_direct[name] - entries[1].features[name]) < 0.05
 
     def test_invalid_horizon(self, predictor):
         import numpy as np

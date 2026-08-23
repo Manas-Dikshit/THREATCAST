@@ -42,7 +42,7 @@ class TestWorldModelLoss:
         _, terms_bad = world_model_loss(outputs(), batch(), {})
         good = outputs()
         good["malicious_logit"] = torch.tensor([-10.0, 10.0])
-        good["risk_logit"] = torch.tensor([10.0, -10.0])
+        good["risk_logit"] = torch.tensor([-10.0, 10.0])
         _, terms_good = world_model_loss(good, batch(), {})
         assert terms_bad["malicious"] > terms_good["malicious"]
         assert terms_bad["risk"] > terms_good["risk"]
